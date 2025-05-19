@@ -1,3 +1,19 @@
+// Este archivo forma parte de un software cubierto por la GNU Affero General Public License v3.0
+// Copyright (C) 2025 Startec Systems
+// Autor: Isaac Montes <startec.systems.inc@gmail.com>
+// https://startec-systems.com
+//
+// Este programa es software libre: puedes redistribuirlo y/o modificarlo
+// bajo los términos de la Licencia Pública General Affero de GNU publicada
+// por la Free Software Foundation, ya sea la versión 3 de la Licencia, o
+// (a tu elección) cualquier versión posterior.
+//
+// Este programa se distribuye con la esperanza de que sea útil,
+// pero SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita
+// de COMERCIALIZACIÓN o ADECUACIÓN PARA UN PROPÓSITO PARTICULAR.
+//
+// Consulta el archivo LICENSE para más detalles.
+
 import 'package:flutter/material.dart';
 
 void main() {
