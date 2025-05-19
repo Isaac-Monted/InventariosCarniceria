@@ -1,0 +1,228 @@
+CREATE TABLE productos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_producto VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    clave VARCHAR(100),
+    presentacion_id INT,    -- Ejemplo: "Pieza" o "Kilo"
+    peso_x_pieza DECIMAL(10,2),   -- Peso por pieza (si aplica)
+    piezas_por_caja INT,          -- Número de piezas por caja
+    stock_min_piezas INT,         -- Stock mínimo en piezas
+    stock_max_piezas INT,         -- Stock máximo en piezas
+    stock_min_kilos DECIMAL(10,2),-- Stock mínimo en kilos
+    stock_max_kilos DECIMAL(10,2),-- Stock máximo en kilos
+    precio DECIMAL(10,2),         -- Precio por pieza o por kilo
+    piezas_iniciales INT,         -- Piezas iniciales en stock
+    kilos_iniciales DECIMAL(10,2),-- Kilos iniciales en stock
+    categoria_id INT,             -- FK a categoría
+    familia_id INT,               -- FK a familia
+    estado ENUM('Disponible', 'Agotado', 'En tránsito'),  -- Estado del producto
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    -- Fecha de creación
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Fecha de última modificación
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+    FOREIGN KEY (familia_id) REFERENCES familias(id),
+    FOREIGN KEY (presentacion_id) REFERENCES presentaciones(id)
+);
+
+
+CREATE TABLE categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE familias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE presentaciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE entradas_inventario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT NOT NULL,
+    compra_id INT,  -- puede ser NULL
+    cajas INT DEFAULT 0,
+    kilos_brutos DECIMAL(10,2) DEFAULT 0,
+    piezas_extra INT DEFAULT 0,
+    destare_add DECIMAL(10,2) DEFAULT 0,
+    total_piezas INT,
+    total_kilos DECIMAL(10,2),
+    observaciones TEXT,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (producto_id) REFERENCES productos(id),
+    FOREIGN KEY (compra_id) REFERENCES compras(id)
+);
+
+
+CREATE TABLE salidas_inventario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT NOT NULL,
+    pedido_id INT,  -- puede ser NULL
+    cajas INT DEFAULT 0,
+    kilos_brutos DECIMAL(10,2) DEFAULT 0,
+    piezas_extra INT DEFAULT 0,
+    destare_add DECIMAL(10,2) DEFAULT 0,
+    total_piezas INT,
+    total_kilos DECIMAL(10,2),
+    observaciones TEXT,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (producto_id) REFERENCES productos(id),
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
+);
+
+
+CREATE TABLE cambios_presentacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    producto_origen_id INT NOT NULL,
+    producto_destino_id INT NOT NULL,
+    
+    cajas_origen INT DEFAULT 0,
+    piezas_extra_origen INT DEFAULT 0,
+    kilos_brutos_origen DECIMAL(10,2) DEFAULT 0,
+    destare_origen DECIMAL(10,2) DEFAULT 0,
+    total_piezas_origen INT,
+    total_kilos_origen DECIMAL(10,2),
+    
+    cajas_destino INT DEFAULT 0,
+    piezas_extra_destino INT DEFAULT 0,
+    kilos_brutos_destino DECIMAL(10,2) DEFAULT 0,
+    destare_destino DECIMAL(10,2) DEFAULT 0,
+    total_piezas_destino INT,
+    total_kilos_destino DECIMAL(10,2),
+    
+    observaciones TEXT,
+
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (producto_origen_id) REFERENCES productos(id),
+    FOREIGN KEY (producto_destino_id) REFERENCES productos(id)
+);
+
+CREATE TABLE clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    razon_social VARCHAR(200),            -- Si aplicas facturación
+    rfc VARCHAR(20),                      -- Opcional, útil para México
+    telefono VARCHAR(20),
+    correo VARCHAR(100),
+    direccion TEXT,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contactos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    razon_social VARCHAR(200),
+    rfc VARCHAR(20),
+    telefono VARCHAR(20),
+    correo VARCHAR(100),
+    direccion TEXT,
+    tipo ENUM('Cliente', 'Proveedor', 'Ambos') NOT NULL DEFAULT 'Cliente',
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE compras (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    proveedor_id INT NOT NULL,
+    folio_compra VARCHAR(50),
+    fecha_compra DATE,
+    total DECIMAL(10,2),
+    observaciones TEXT,
+    estado ENUM('Pendiente', 'Recibida', 'Cancelada') DEFAULT 'Pendiente',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (proveedor_id) REFERENCES contactos(id)
+);
+
+
+CREATE TABLE pedidos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    folio_pedido VARCHAR(50),
+    fecha_pedido DATE,
+    total DECIMAL(10,2),
+    observaciones TEXT,
+    estado ENUM('Pendiente', 'Entregado', 'Cancelado') DEFAULT 'Pendiente',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES contactos(id)
+);
+
+
+CREATE TABLE configuracion_empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_empresa VARCHAR(150),
+    rfc VARCHAR(20),
+    direccion TEXT,
+    telefono VARCHAR(20),
+    logo VARCHAR(255),
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE configuraciones_generales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clave VARCHAR(100) NOT NULL UNIQUE,
+    valor TEXT NOT NULL,
+    descripcion TEXT
+);
+
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_completo VARCHAR(150) NOT NULL,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    correo VARCHAR(100),
+    telefono VARCHAR(20),
+    
+    rol_id INT NOT NULL,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    ultimo_login DATETIME,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion TEXT,
+
+    -- Editar esto
+    puede_ver_productos BOOLEAN DEFAULT FALSE,
+    puede_editar_productos BOOLEAN DEFAULT FALSE,
+    puede_ver_inventario BOOLEAN DEFAULT FALSE,
+    puede_registrar_entradas BOOLEAN DEFAULT FALSE,
+    puede_registrar_salidas BOOLEAN DEFAULT FALSE,
+    puede_hacer_ajustes BOOLEAN DEFAULT FALSE,
+    puede_ver_reportes BOOLEAN DEFAULT FALSE,
+    puede_configurar BOOLEAN DEFAULT FALSE,
+    puede_crear_usuarios BOOLEAN DEFAULT FALSE
+);
